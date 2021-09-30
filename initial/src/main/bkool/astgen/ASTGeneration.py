@@ -17,70 +17,105 @@ class ASTGeneration(BKOOLVisitor):
     #     return IntType() if ctx.INTTYPE() else VoidType()
         
     def visitProgram(self, ctx: BKOOLParser.ProgramContext):
-        pass
+        return
     def visitClassDeclList(self, ctx: BKOOLParser.ClassDeclListContext):
-        pass
+        return
     def visitClassDecl(self, ctx: BKOOLParser.ClassDeclContext):
-        pass
+        return
     def visitMemberList(self, ctx: BKOOLParser.MemberListContext):
-        pass
+        return
     def visitMember(self, ctx: BKOOLParser.MemberContext):
-        pass
+        return
     def visitAttrKeyword(self, ctx: BKOOLParser.AttrKeywordContext):
-        pass
+        return
     def visitAttrType(self, ctx: BKOOLParser.AttrTypeContext):
-        pass
+        return
     def visitArrayType(self, ctx: BKOOLParser.ArrayTypeContext):
-        pass
+        return
     def visitAttrList(self, ctx: BKOOLParser.AttrListContext):
-        pass
+        return
     def visitAttribute(self, ctx: BKOOLParser.AttributeContext):
-        pass
+        return
     def visitReturnType(self, ctx: BKOOLParser.ReturnTypeContext):
-        pass
+        return
     def visitMethod(self, ctx: BKOOLParser.MethodContext):
-        pass
+        return
     def visitParamList(self, ctx: BKOOLParser.ParamListContext):
-        pass
+        return
     def visitParam(self, ctx: BKOOLParser.ParamContext):
-        pass
+        return
     def visitIdList(self, ctx: BKOOLParser.IdListContext):
-        pass
+        return
 
     def visitExp(self, ctx: BKOOLParser.ExpContext):
-        pass
+        return
     def visitArgList(self, ctx: BKOOLParser.ArgListContext):
-        pass
+        return
     def visitObj_create(self, ctx: BKOOLParser.Obj_createContext):
-        pass
+        return
 
     def visitStmtList(self, ctx: BKOOLParser.StmtListContext):
-        pass
+        return
     def visitStmt(self, ctx: BKOOLParser.StmtContext):
-        pass
+        return
     def visitBlockStmt(self, ctx: BKOOLParser.BlockStmtContext):
-        pass
+        return self.visit
     def visitBlockBody(self, ctx: BKOOLParser.BlockBodyContext):
-        pass
+        return
     def visitDeclList(self, ctx: BKOOLParser.DeclListContext):
-        pass
+        return
     def visitDecl(self, ctx: BKOOLParser.DeclContext):
-        pass
+        return
     def visitAssignStmt(self, ctx: BKOOLParser.AssignStmtContext):
-        pass
+        lhs = self.visit(ctx.lhs())
+        exp = self.visit(ctx.exp())
+        return Assign(lhs, exp)
+
     def visitLhs(self, ctx: BKOOLParser.LhsContext):
-        pass
-    def visitIfStmt(self, ctx: BKOOLParser.IfStmtContext):
-        pass
+        if ctx.getChildCount() == 1:
+            return Id(ctx.ID().getText())   # 'local var'
+        elif ctx.getChildCount() == 4:
+            exp1 = self.visit(ctx.getChild(0))
+            exp2 = self.visit(ctx.getChild(2))
+            return ArrayCell(exp1, exp2)    # 'index op'
+        else:
+            exp = self.visit(ctx.exp())     # is None if 'static attr access'
+            return FieldAccess(exp, ctx.ID().getText())     # 'attr access'
+
+    def visitIfStmt(self, ctx: BKOOLParser.IfStmtContext) -> If:
+        exp = self.visit(ctx.exp())
+        stmtThen = self.visit(ctx.getChild(3))
+
+        if ctx.getChildCount() > 4:
+            stmtElse = self.visit(ctx.getChild(5))
+            return If(exp, stmtThen, stmtElse)
+        return If(exp, stmtThen)
+        
     def visitForStmt(self, ctx: BKOOLParser.ForStmtContext):
-        pass
+        scalarVar = self.visit(ctx.scalarVar())
+        expFrom = self.visit(ctx.getChild(3))
+        expTo = self.visit(ctx.getChild(5))
+        dir = True if ctx.TO() else False
+        stmt = self.visit(ctx.stmt())
+        return For(scalarVar, expFrom, expTo, dir, stmt)
+
     def visitScalarVar(self, ctx: BKOOLParser.ScalarVarContext):
-        pass
+        if ctx.getChildCount() == 1:
+            return Id(ctx.ID().getText())   # 'local var'
+        elif ctx.getChildCount() == 4:
+            exp1 = self.visit(ctx.getChild(0))
+            exp2 = self.visit(ctx.getChild(2))
+            return ArrayCell(exp1, exp2)    # 'index op'
+        else:
+            exp = self.visit(ctx.exp())     # is None if 'static attr access'
+            return FieldAccess(exp, ctx.ID().getText())     # 'attr access'
+
     def visitBreakStmt(self, ctx: BKOOLParser.BreakStmtContext):
-        pass
+        return Break()
     def visitContinueStmt(self, ctx: BKOOLParser.ContinueStmtContext):
-        pass
+        return Continue()
     def visitReturnStmt(self, ctx: BKOOLParser.ReturnStmtContext):
-        pass
+        return Return(self.visit(ctx.exp()))
+        
     def visitMethodInvokeStmt(self, ctx: BKOOLParser.MethodInvokeStmtContext):
-        pass
+        return

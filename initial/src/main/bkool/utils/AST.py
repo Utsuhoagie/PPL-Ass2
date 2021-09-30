@@ -220,6 +220,7 @@ class ClassDecl(Decl):
 class SIKind(AST):
     __metaclass__ = ABCMeta
 
+
 # used for instance member
 class Instance(SIKind): 
     def __str__(self):
@@ -229,6 +230,8 @@ class Instance(SIKind):
 class Static(SIKind):
     def __str__(self):
         return "Static"
+
+
 
 # used for a normal or special method declaration. 
 # In the case of special method declaration,the name will be Id("<init>") 
