@@ -109,7 +109,7 @@ class TestAST:
         dest = open(os.path.join(SOL_DIR,str(num) + ".txt"),"r")
         line = dest.read()
         if line != expect:
-            print(line+"*"+expect+"*")
+            print("\t" + line +"\nvs\n\t" + expect)
         return line == expect
 
     @staticmethod

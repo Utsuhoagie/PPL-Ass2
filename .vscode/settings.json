@@ -1,6 +1,8 @@
 {
     "python.analysis.extraPaths": [
         "./initial/target",
-        "./initial/src/main/bkool/utils"
+        "./initial/src/main/bkool/utils",
+        "./initial/src/main/bkool/astgen",
+        "./initial/src/main/bkool/parser"
     ]
 }

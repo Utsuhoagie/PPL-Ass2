@@ -39,7 +39,8 @@ classDecl       : CLASS ID EXTENDS ID LP (memberList | ) RP
 memberList      : member memberList
                 | member;
 member          : attrKeyword attrType attrList SEMI
-                | (STATIC | ) returnType method;
+                | (STATIC | ) returnType method
+                | constructor;
 
 attrKeyword     : STATIC FINAL | FINAL STATIC | STATIC | FINAL | ;
 attrType        : INT | FLOAT | BOOLEAN | STRING | ID | arrayType;  // ID is for class names (e.g Shape s)
@@ -51,12 +52,13 @@ attribute       : ID INIT exp
 
 returnType      : INT | FLOAT | BOOLEAN | STRING | VOID;
 method          : ID LB (paramList | ) RB blockStmt;
+constructor     : ID LB (paramList | ) RB blockStmt;
 paramList       : param SEMI paramList
                 | param;
 param           : attrType idList;
 idList          : ID COMMA idList
                 | ID;
-    
+
 // --- [2] Expressions -------------------------
 
 exp         : LB exp RB | INTLIT | FLOATLIT | BOOLLIT | STRINGLIT | ARRAYLIT | THIS | ID    // highest priority

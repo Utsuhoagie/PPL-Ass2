@@ -69,6 +69,11 @@ class BKOOLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by BKOOLParser#constructor.
+    def visitConstructor(self, ctx:BKOOLParser.ConstructorContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by BKOOLParser#paramList.
     def visitParamList(self, ctx:BKOOLParser.ParamListContext):
         return self.visitChildren(ctx)

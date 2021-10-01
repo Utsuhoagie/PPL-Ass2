@@ -9,22 +9,40 @@ class ASTGenSuite(unittest.TestCase):
         expect = str(Program([ClassDecl(Id("main"),[])]))
         self.assertTrue(TestAST.test(input,expect,300))
 
+    def test_simple_program2(self):
+        """Simple program: class main {} """
+        input = """
+            class main {
+
+            }
+            class foo {
+                
+            }"""
+        expect = str(Program([ClassDecl(Id("main"),[]), ClassDecl(Id("foo"),[])]))
+        self.assertTrue(TestAST.test(input,expect,301))
+
+    def test_simple_program3(self):
+        """Simple program: class main {} """
+        input = """class main extends foo {}"""
+        expect = str(Program([ClassDecl(Id("main"),[],Id("foo"))]))
+        self.assertTrue(TestAST.test(input,expect,302))
+
     def test_class_with_one_decl_program(self):
         """More complex program"""
         input = """class main {
-            a:integer;
+            int a;
         }"""
         expect = str(Program([ClassDecl(Id("main"),[AttributeDecl(Instance(),VarDecl(Id("a"),IntType()))])]))
-        self.assertTrue(TestAST.test(input,expect,301))
+        self.assertTrue(TestAST.test(input,expect,303))
     
-    def test_class_with_two_decl_program(self):
-        """More complex program"""
-        input = """class main {
-            a:integer;
-            b:integer;
-        }"""
-        expect = str(Program([ClassDecl(Id("main"),
-            [AttributeDecl(Instance(),VarDecl(Id("a"),IntType())),
-             AttributeDecl(Instance(),VarDecl(Id("b"),IntType()))])]))
-        self.assertTrue(TestAST.test(input,expect,302))
+    # def test_class_with_two_decl_program(self):
+    #     """More complex program"""
+    #     input = """class main {
+    #         a:integer;
+    #         b:integer;
+    #     }"""
+    #     expect = str(Program([ClassDecl(Id("main"),
+    #         [AttributeDecl(Instance(),VarDecl(Id("a"),IntType())),
+    #          AttributeDecl(Instance(),VarDecl(Id("b"),IntType()))])]))
+    #     self.assertTrue(TestAST.test(input,expect,302))
    

@@ -1,3 +1,7 @@
-class main {
-            a:integer;
-        }
+
+            class main {
+
+            }
+            class foo {
+                
+            }
