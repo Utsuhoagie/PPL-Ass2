@@ -101,8 +101,8 @@ class ASTGeneration(BKOOLVisitor):
             attrList = self.visit(ctx.attrList())   # multiple tuples of (Id, Expr = None)
             print("\t\t\t attrList = " + str(attrList))
             
-            kind = Static() if "STATIC" in attrKeyword else Instance()
-            if "FINAL" in attrKeyword:
+            kind = Static() if "static" in attrKeyword else Instance()
+            if "final" in attrKeyword:
                 return [AttributeDecl(kind, ConstDecl(idElem[0], attrType, idElem[1])) for idElem in attrList]
             else:
                 return [AttributeDecl(kind, VarDecl(idElem[0], attrType, idElem[1])) for idElem in attrList]
@@ -113,9 +113,9 @@ class ASTGeneration(BKOOLVisitor):
         
         if ctx.method():
             returnType = self.visit(ctx.returnType())
-            method = self.visit(ctx.method())
+            method = self.visit(ctx.method())   # (Id, paramList, body)
             if ctx.STATIC():
-                return # --------------------------
+                return [MethodDecl(Static(),)] # --------------------------
         return  # --------------------------\-
 
     def visitAttrKeyword(self, ctx: BKOOLParser.AttrKeywordContext) -> str:
@@ -127,10 +127,11 @@ class ASTGeneration(BKOOLVisitor):
         print("\t\t in visitAttrKeyword")
         if ctx.getChildCount() > 0:
             print("\t\t\t keyword = " + str(ctx.getChild(0)))
+
         if ctx.getChildCount() == 2:
-            return ctx.getChild(0).getText() + " " + ctx.getChild(0).getText()
+            return (ctx.getChild(0).getText() + " " + ctx.getChild(0).getText()).lower()
         elif ctx.getChildCount() == 1:
-            return ctx.getChild(0).getText()
+            return (ctx.getChild(0).getText()).lower()
         
         return ""
 
@@ -138,7 +139,7 @@ class ASTGeneration(BKOOLVisitor):
         # attrType        : INT | FLOAT | BOOLEAN | STRING | ID | arrayType;  // ID is for class names (e.g Shape s)
         if ctx.arrayType():
             arrayType = self.visit(ctx.arrayType())
-            return # ----------------------
+            return # ---------------------- TODO: ArrayType
         if ctx.INT():
             return IntType()
         if ctx.FLOAT():
@@ -149,48 +150,64 @@ class ASTGeneration(BKOOLVisitor):
             return StringType()
         if ctx.ID():
             return ClassType(Id(ctx.getChild(0).getText()))
-        return ctx.getChild(0).getText()
 
     def visitArrayType(self, ctx: BKOOLParser.ArrayTypeContext):
         # arrayType       : (INT | FLOAT | BOOLEAN | STRING | ID) LQ INTLIT RQ;
 
-        return
+        arrType = None
+
+        return # -------------------------------- TODO
 
     def visitAttrList(self, ctx: BKOOLParser.AttrListContext):
-        # list of attr NAMES (+ INIT) only           e.g: [(a,4), (b)]
+        # list of [(NAME, INIT = None), (NAME2, INIT2 = None),...] only           e.g: [(a,4), (b)]
 
         # attrList        : attribute COMMA attrList
         #                 | attribute;
+
         attr = self.visit(ctx.attribute())
         if ctx.getChildCount() > 1:
             attrList = self.visit(ctx.attrList())
             return [attr] + attrList
         return [attr]
 
-    def visitAttribute(self, ctx: BKOOLParser.AttributeContext) -> Tuple[Id,Expr]:
-        # returns a tuple of (Id(), Expr()) OR (Id())
+    def visitAttribute(self, ctx: BKOOLParser.AttributeContext) -> Tuple[Id, Expr]:
+        # returns a tuple of (Id, Expr = None)
         # to create an actual VarDecl() or ConstDecl() later
 
         # attribute       : ID INIT exp
         #                 | ID;
+
         id = Id(ctx.getChild(0).getText())
         if ctx.exp():
             exp = self.visit(ctx.exp())
-            return # --------------------------
+            return (id, exp)
         return (id, None)
 
     def visitReturnType(self, ctx: BKOOLParser.ReturnTypeContext):
         # returnType      : INT | FLOAT | BOOLEAN | STRING | VOID;
 
-        return ctx.getChild(0).getText()
+        if ctx.INT():
+            return IntType()
+        if ctx.FLOAT():
+            return FloatType()
+        if ctx.BOOLEAN():
+            return BoolType()
+        if ctx.STRING():
+            return StringType()
+        if ctx.VOID():
+            return VoidType()
 
-    def visitMethod(self, ctx: BKOOLParser.MethodContext):
+    def visitMethod(self, ctx: BKOOLParser.MethodContext) -> tuple:     # (Id, paramList, blockStmt) -----------------------------
         # method          : ID LB (paramList | ) RB blockStmt;
 
-        return
+        id = Id(ctx.ID().getText())
+        paramList = None if not ctx.paramList() else self.visit(ctx.paramList())
+        blockStmt = self.visit(ctx.blockStmt)
+        return (id, paramList, blockStmt)
 
     def visitConstructor(self, ctx: BKOOLParser.ConstructorContext):
         # constructor     : ID LB (paramList | ) RB blockStmt;
+
 
         return 
 
@@ -203,13 +220,18 @@ class ASTGeneration(BKOOLVisitor):
     def visitParam(self, ctx: BKOOLParser.ParamContext):
         # param           : attrType idList;
 
+
         return
 
     def visitIdList(self, ctx: BKOOLParser.IdListContext):
         # idList          : ID COMMA idList
         #                 | ID;
 
-        return
+        id = Id(ctx.ID().getText())
+        if ctx.getChildCount() == 3:
+            idList = self.visit(ctx.idList())
+            return [id] + idList
+        return [id]
 
 
 
@@ -266,16 +288,17 @@ class ASTGeneration(BKOOLVisitor):
 
     def visitBlockStmt(self, ctx: BKOOLParser.BlockStmtContext):
         # blockStmt   : LP (blockBody | ) RP;
-
-        blockBody = self.visit(ctx.blockBody()) # nullable
-        return blockBody
+        if ctx.blockBody():
+            blockBody = self.visit(ctx.blockBody())
+            return Block(blockBody[0], blockBody[1])
+        return Block([],[])
 
     def visitBlockBody(self, ctx: BKOOLParser.BlockBodyContext):
         # blockBody   : (declList | ) (stmtList | );
 
-        declList = self.visit(ctx.declList())   # these are probably lists
-        stmtList = self.visit(ctx.stmtList())
-        return Block(declList, stmtList)        # 'blockStmt's body'
+        declList = None if not ctx.declList() else self.visit(ctx.declList())   # these are probably lists
+        stmtList = None if not ctx.stmtList() else self.visit(ctx.stmtList())
+        return (declList, stmtList)        # 'blockStmt's body'
 
     def visitDeclList(self, ctx: BKOOLParser.DeclListContext):
         # declList    : decl declList
@@ -289,8 +312,12 @@ class ASTGeneration(BKOOLVisitor):
 
     def visitDecl(self, ctx: BKOOLParser.DeclContext):
         # decl        : (FINAL | ) attrType attrList SEMI;
+        attrType = self.visit(ctx.attrType())
+        attrList = self.visit(ctx.attrList())
 
-        return
+        if ctx.FINAL():
+            return [ConstDecl(idElem[0], attrType, idElem[1]) for idElem in attrList]
+        return [VarDecl(idElem[0], attrType, idElem[1]) for idElem in attrList]
 
     def visitAssignStmt(self, ctx: BKOOLParser.AssignStmtContext):
         # assignStmt  : lhs ASSIGN exp SEMI;
@@ -311,14 +338,20 @@ class ASTGeneration(BKOOLVisitor):
             exp1 = self.visit(ctx.getChild(0))
             exp2 = self.visit(ctx.getChild(2))
             return ArrayCell(exp1, exp2)    # 'index op'
+        elif ctx.exp():
+            exp = self.visit(ctx.exp())
+            fieldName = Id(ctx.ID().getText())
+            return FieldAccess(exp, fieldName)      # 'static attr access'
         else:
-            exp = self.visit(ctx.exp())     # is None if 'static attr access'
-            return FieldAccess(exp, ctx.ID().getText())     # 'attr access'
+            id = Id(ctx.getChild(0).getText())
+            fieldName = Id(ctx.getChild(2).getText())
+            return FieldAccess(id, fieldName)       # 'instance attr access'
+
+
 
     def visitIfStmt(self, ctx: BKOOLParser.IfStmtContext) -> If:
         # ifStmt      : IF exp THEN stmt ELSE stmt
         #             | IF exp THEN stmt;
-
         
         exp = self.visit(ctx.exp())
         stmtThen = self.visit(ctx.getChild(3))
@@ -349,9 +382,10 @@ class ASTGeneration(BKOOLVisitor):
             exp1 = self.visit(ctx.getChild(0))
             exp2 = self.visit(ctx.getChild(2))
             return ArrayCell(exp1, exp2)    # 'index op'
-        else:
-            exp = self.visit(ctx.exp())     # is None if 'static attr access'
-            return FieldAccess(exp, ctx.ID().getText())     # 'attr access'
+        elif ctx.exp():
+            exp = self.visit(ctx.exp())
+            fieldName = Id(ctx.ID().getText())
+            return FieldAccess(exp, fieldName)     # 'static attr access'
 
     def visitBreakStmt(self, ctx: BKOOLParser.BreakStmtContext):
         # breakStmt   : BREAK SEMI;

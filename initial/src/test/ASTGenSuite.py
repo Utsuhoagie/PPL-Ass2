@@ -35,14 +35,43 @@ class ASTGenSuite(unittest.TestCase):
         expect = str(Program([ClassDecl(Id("main"),[AttributeDecl(Instance(),VarDecl(Id("a"),IntType()))])]))
         self.assertTrue(TestAST.test(input,expect,303))
     
-    # def test_class_with_two_decl_program(self):
-    #     """More complex program"""
-    #     input = """class main {
-    #         a:integer;
-    #         b:integer;
-    #     }"""
-    #     expect = str(Program([ClassDecl(Id("main"),
-    #         [AttributeDecl(Instance(),VarDecl(Id("a"),IntType())),
-    #          AttributeDecl(Instance(),VarDecl(Id("b"),IntType()))])]))
-    #     self.assertTrue(TestAST.test(input,expect,302))
+    def test_class_with_two_decl_program(self):
+        """More complex program"""
+        input = """class main {
+            int a;
+            int b;
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [AttributeDecl(Instance(),VarDecl(Id("a"),IntType())),
+             AttributeDecl(Instance(),VarDecl(Id("b"),IntType()))])]))
+        self.assertTrue(TestAST.test(input,expect,304))
    
+    def test_class_with_sameline_decl_program(self):
+        """More complex program"""
+        input = """class main {
+            int a,b;
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [AttributeDecl(Instance(),VarDecl(Id("a"),IntType())),
+             AttributeDecl(Instance(),VarDecl(Id("b"),IntType()))])]))
+        self.assertTrue(TestAST.test(input,expect,305))
+
+    def test_class_with_samelinediff_decl_program(self):
+        """More complex program"""
+        input = """class main {
+            static int a,b;
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [AttributeDecl(Static(),VarDecl(Id("a"),IntType())),
+             AttributeDecl(Static(),VarDecl(Id("b"),IntType()))])]))
+        self.assertTrue(TestAST.test(input,expect,306))
+
+    def testBlock(self):
+        """More complex program"""
+        input = """class main {
+            
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [AttributeDecl(Static(),VarDecl(Id("a"),IntType())),
+             AttributeDecl(Static(),VarDecl(Id("b"),IntType()))])]))
+        self.assertTrue(TestAST.test(input,expect,306))
