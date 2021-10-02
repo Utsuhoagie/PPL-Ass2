@@ -47,8 +47,8 @@ class LexerSuite(unittest.TestCase):
     #     self.assertTrue(TestLexer.test(""" "sss\z" ""","""Illegal Escape In String: sss""",113))
     #     # WRONG!!!!!!!!!
 
-    def test_ArrayLit(self):
-        self.assertTrue(TestLexer.test("{1,5}","{1,5},<EOF>",113))
+    # def test_ArrayLit(self):
+    #     self.assertTrue(TestLexer.test("{1,5}","{1,5},<EOF>",113))
 
     def test_class2(self):
         self.assertTrue(TestLexer.test("class A {}", "class,A,{,},<EOF>",114))

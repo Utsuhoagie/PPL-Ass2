@@ -61,7 +61,7 @@ idList          : ID COMMA idList
 
 // --- [2] Expressions -------------------------
 
-exp         : LB exp RB | INTLIT | FLOATLIT | BOOLLIT | STRINGLIT | ARRAYLIT | THIS | ID    // highest priority
+exp         : LB exp RB | INTLIT | FLOATLIT | BOOLLIT | STRINGLIT | arrayLit | THIS | ID    // highest priority
             | obj_create
             | exp DOT ID LB (argList | ) RB // instance_method_invoke
             | ID DOT ID LB (argList | )RB   // static_method_invoke
@@ -77,6 +77,13 @@ exp         : LB exp RB | INTLIT | FLOATLIT | BOOLLIT | STRINGLIT | ARRAYLIT | T
             | exp (AND | OR) exp
             | exp (EQ | NEQ) exp
             | exp (LESS | GREATER | LEQ | GREQ) exp;
+
+// Array literal
+arrayLit    : LP (INTLIT | FLOATLIT | BOOLLIT | STRINGLIT) litList RP
+            | LP (INTLIT | FLOATLIT | BOOLLIT | STRINGLIT) RP;
+litList     : COMMA (INTLIT | FLOATLIT | BOOLLIT | STRINGLIT) litList
+            | COMMA (INTLIT | FLOATLIT | BOOLLIT | STRINGLIT);
+
 
 argList     : exp COMMA argList
             | exp;
@@ -174,13 +181,6 @@ methodInvokeStmt: exp DOT ID LB (argList | ) RB SEMI    // instance_method_invok
         pass
     };
 			
-	// Array literal
-	ARRAYLIT: LP LITERAL LITLIST RP
-            | LP LITERAL RP;
-	fragment LITLIST : COMMA LITERAL LITLIST
-                     | COMMA LITERAL;
-			
-	fragment LITERAL: INTLIT | FLOATLIT | BOOLLIT | STRINGLIT;
 
 // ------ Keywords ------
     BOOLEAN: 'boolean';
