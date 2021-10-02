@@ -240,7 +240,7 @@ class ASTGenSuite(unittest.TestCase):
             [MethodDecl(Instance(),Id("foo"),[],VoidType(),
                 Block(
                     [
-                        VarDecl(Id("s"), ClassType(Id("Shape")))
+                        VarDecl(Id("s"), ClassType(Id("Shape")), NullLiteral())
                     ]
                     ,
                     [
@@ -299,7 +299,7 @@ class ASTGenSuite(unittest.TestCase):
             [MethodDecl(Instance(),Id("foo"),[],VoidType(),
                 Block(
                     [
-                        VarDecl(Id("s"), ClassType(Id("Shape")))
+                        VarDecl(Id("s"), ClassType(Id("Shape")), NullLiteral())
                     ]
                     ,
                     [
@@ -320,7 +320,7 @@ class ASTGenSuite(unittest.TestCase):
             [MethodDecl(Instance(),Id("foo"),[],VoidType(),
                 Block(
                     [
-                        VarDecl(Id("s"), ClassType(Id("Shape")))
+                        VarDecl(Id("s"), ClassType(Id("Shape")), NullLiteral())
                     ]
                     ,
                     [
@@ -387,7 +387,7 @@ class ASTGenSuite(unittest.TestCase):
                 Block(
                     [
                         VarDecl(Id("n"), IntType()),
-                        VarDecl(Id("s"), ClassType(Id("Shape")))
+                        VarDecl(Id("s"), ClassType(Id("Shape")), NullLiteral())
                     ]
                     ,
                     [
@@ -685,11 +685,25 @@ class ASTGenSuite(unittest.TestCase):
                 Block(
                     [
                         VarDecl(Id("n"), BoolType()),
-                        VarDecl(Id("s"), ClassType(Id("Shape")))
+                        VarDecl(Id("s"), ClassType(Id("Shape")), NullLiteral())
                     ]
                     ,
                     [
-                        Assign(Id("n"), BinaryOp(">",Id("n1"),Id("n2")))
+                        CallStmt(Id("s"),Id("print"),[])
                     ]
                 ))])]))
         self.assertTrue(TestAST.test(input,expect,340))
+
+    def testAttr(self):
+        
+        input = """class main {
+            Shape s;
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [
+                AttributeDecl(
+                    Instance(),VarDecl(Id("s"), ClassType(Id("Shape")), NullLiteral())
+                )
+            ]
+            )]))
+        self.assertTrue(TestAST.test(input,expect,341))

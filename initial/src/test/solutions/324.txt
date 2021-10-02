@@ -1,1 +1,1 @@
-Program([ClassDecl(Id(main),[MethodDecl(Id(foo),Instance,[],VoidType,Block([VarDecl(Id(s),ClassType(Id(Shape)))],[AssignStmt(Id(s),Self())]))])])
+Program([ClassDecl(Id(main),[MethodDecl(Id(foo),Instance,[],VoidType,Block([VarDecl(Id(s),ClassType(Id(Shape)),NullLiteral())],[AssignStmt(Id(s),Self())]))])])

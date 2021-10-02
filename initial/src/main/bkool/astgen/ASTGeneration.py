@@ -103,8 +103,28 @@ class ASTGeneration(BKOOLVisitor):
             
             kind = Static() if "static" in attrKeyword else Instance()
             if "final" in attrKeyword:
+                if type(attrType) is ClassType:
+                    print("-=-=-==-=-=-=-=-===-=-=-=-=-=-=-=-==-=-=-=-=-==-=-=-=-=-===========================")
+                    AttrDeclListClass = []
+                    for idElem in attrList:
+                        if idElem[1] == None:
+                            AttrDeclListClass.append(AttributeDecl(kind, ConstDecl(idElem[0], attrType, NullLiteral())))
+                        else:
+                            AttrDeclListClass.append(AttributeDecl(kind, ConstDecl(idElem[0], attrType, idElem[1])))
+                    
+                    return AttrDeclListClass
                 return [AttributeDecl(kind, ConstDecl(idElem[0], attrType, idElem[1])) for idElem in attrList]
             else:
+                if type(attrType) is ClassType:
+                    print("-=-=-==-=-=-=-=-===-=-=-=-=-=-=-=-==-=-=-=-=-==-=-=-=-=-===========================")
+                    AttrDeclListClass = []
+                    for idElem in attrList:
+                        if idElem[1] == None:
+                            AttrDeclListClass.append(AttributeDecl(kind, VarDecl(idElem[0], attrType, NullLiteral())))
+                        else:
+                            AttrDeclListClass.append(AttributeDecl(kind, VarDecl(idElem[0], attrType, idElem[1])))
+                    
+                    return AttrDeclListClass
                 return [AttributeDecl(kind, VarDecl(idElem[0], attrType, idElem[1])) for idElem in attrList]
 
             
@@ -467,7 +487,7 @@ class ASTGeneration(BKOOLVisitor):
         if ctx.blockBody():
             blockBody = self.visit(ctx.blockBody())
             print("\t\t\t in blockStmt")
-            print("\t\t\t " + str(blockBody))
+            #print("\t\t\t " + str(blockBody))
             return Block(blockBody[0], blockBody[1])
         return Block([],[])
 
@@ -494,7 +514,26 @@ class ASTGeneration(BKOOLVisitor):
         attrList = self.visit(ctx.attrList())
 
         if ctx.FINAL():
+            if type(attrType) is ClassType:
+                declList = []
+                for idElem in attrList:
+                    if idElem[1] == None:
+                        declList.append(ConstDecl(idElem[0], attrType, NullLiteral()))
+                    else:
+                        declList.append(ConstDecl(idElem[0], attrType, idElem[1]))
+                return declList
+
             return [ConstDecl(idElem[0], attrType, idElem[1]) for idElem in attrList]
+        
+        if type(attrType) is ClassType:
+                declList = []
+                for idElem in attrList:
+                    if idElem[1] == None:
+                        declList.append(VarDecl(idElem[0], attrType, NullLiteral()))
+                    else:
+                        declList.append(VarDecl(idElem[0], attrType, idElem[1]))
+                return declList
+                    
         return [VarDecl(idElem[0], attrType, idElem[1]) for idElem in attrList]
 
     def visitAssignStmt(self, ctx: BKOOLParser.AssignStmtContext):
