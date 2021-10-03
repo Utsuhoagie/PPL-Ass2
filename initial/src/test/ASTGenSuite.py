@@ -830,3 +830,50 @@ class ASTGenSuite(unittest.TestCase):
                         ]
                 ))],Id("thing"))]))
         self.assertTrue(TestAST.test(input,expect,346))
+
+    def testFull2(self):
+        
+        input = """class Circle extends Shape {
+            float radius;
+            static int count = 0;
+
+            Circle(float r) {
+                this.radius := r;
+            }
+
+            float getRadius() {
+                return this.radius;
+            }
+
+            static int getCount() {
+                return Circle.count;
+            }
+        }"""
+        expect = str(Program([ClassDecl(Id("Circle"),
+            [
+                AttributeDecl(Instance(),VarDecl(Id("radius"), FloatType())),
+                AttributeDecl(Static(),VarDecl(Id("count"), IntType(), IntLiteral(0))),
+                MethodDecl(Instance(), Id("Circle"), [VarDecl(Id("r"),FloatType())], None, 
+                    Block([],[
+                        Assign(FieldAccess(SelfLiteral(),Id("radius")), Id("r"))
+                    ])),
+                MethodDecl(Instance(),Id("getRadius"),[],FloatType(),
+                    Block(
+                        [
+                        ]
+                        ,
+                        [
+                            Return(FieldAccess(SelfLiteral(), Id("radius")))
+                        ]
+                )),
+                MethodDecl(Static(),Id("getCount"),[],IntType(),
+                    Block(
+                        [
+                        ]
+                        ,
+                        [
+                            Return(FieldAccess(Id("Circle"), Id("count")))
+                        ]
+                    ))
+            ],Id("Shape"))]))
+        self.assertTrue(TestAST.test(input,expect,347))
