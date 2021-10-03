@@ -694,7 +694,7 @@ class ASTGenSuite(unittest.TestCase):
                 ))])]))
         self.assertTrue(TestAST.test(input,expect,340))
 
-    def testAttr(self):
+    def testAttrNull(self):
         
         input = """class main {
             Shape s;
@@ -707,3 +707,126 @@ class ASTGenSuite(unittest.TestCase):
             ]
             )]))
         self.assertTrue(TestAST.test(input,expect,341))
+
+    def testCallWithExpr(self):
+        
+        input = """class main {
+            void foo() {
+                int[3] s = {2,4,6};
+                int index = 2, n = 1;
+                
+                n := s[index - n];
+            }
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [MethodDecl(Instance(),Id("foo"),[],VoidType(),
+                Block(
+                    [
+                        VarDecl(Id("s"), ArrayType(3,IntType()), ArrayLiteral([IntLiteral(2),IntLiteral(4),IntLiteral(6)])),
+                        VarDecl(Id("index"), IntType(), IntLiteral(2)),
+                        VarDecl(Id("n"), IntType(), IntLiteral(1))
+                    ]
+                    ,
+                    [
+                        Assign(Id("n"), ArrayCell(Id("s"),BinaryOp("-",Id("index"),Id("n"))))
+                    ]
+                ))])]))
+        self.assertTrue(TestAST.test(input,expect,342))
+
+    def testCallWithExpr2(self):
+        
+        input = """class main {
+            void foo() {
+                int[3] arr = {2,4,6};
+                Shape s = new Shape();
+                int n = 1;
+                
+                n := arr[s.getWidth() - n];
+            }
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [MethodDecl(Instance(),Id("foo"),[],VoidType(),
+                Block(
+                    [
+                        VarDecl(Id("arr"), ArrayType(3,IntType()), ArrayLiteral([IntLiteral(2),IntLiteral(4),IntLiteral(6)])),
+                        VarDecl(Id("s"), ClassType(Id("Shape")), NewExpr(Id("Shape"),[])),
+                        VarDecl(Id("n"), IntType(), IntLiteral(1))
+                    ]
+                    ,
+                    [
+                        Assign(Id("n"), ArrayCell(Id("arr"),BinaryOp("-",CallStmt(Id("s"),Id("getWidth"),[]),Id("n"))))
+                    ]
+                ))])]))
+        self.assertTrue(TestAST.test(input,expect,343))
+
+    def testOrder(self):
+        
+        input = """class main {
+            void foo() {
+                int n;
+                
+                n := 2 - 3*5;
+            }
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [MethodDecl(Instance(),Id("foo"),[],VoidType(),
+                Block(
+                    [
+                        VarDecl(Id("n"), IntType())
+                    ]
+                    ,
+                    [
+                        Assign(Id("n"), BinaryOp("-",IntLiteral(2),BinaryOp("*",IntLiteral(3),IntLiteral(5))))
+                    ]
+                ))])]))
+        self.assertTrue(TestAST.test(input,expect,344))
+
+    def testOrder2(self):
+        
+        input = """class main {
+            void foo() {
+                int n;
+                
+                n := (2 - 3)*5;
+            }
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [MethodDecl(Instance(),Id("foo"),[],VoidType(),
+                Block(
+                    [
+                        VarDecl(Id("n"), IntType())
+                    ]
+                    ,
+                    [
+                        Assign(Id("n"), BinaryOp("*",BinaryOp("-",IntLiteral(2),IntLiteral(3)),IntLiteral(5)))
+                    ]
+                ))])]))
+        self.assertTrue(TestAST.test(input,expect,345))
+
+    def testFull(self):
+        
+        input = """class main extends thing{
+            static int count = 5*2;
+
+            int foo(int count) {
+                int n;
+                
+                n := count * 2;
+                return n;
+            }
+        }"""
+        expect = str(Program([ClassDecl(Id("main"),
+            [
+                AttributeDecl(Static(),VarDecl(Id("count"), IntType(), BinaryOp("*", IntLiteral(5),IntLiteral(2)))),
+                MethodDecl(Instance(),Id("foo"),[VarDecl(Id("count"),IntType())],IntType(),
+                    Block(
+                        [
+                            VarDecl(Id("n"), IntType())
+                        ]
+                        ,
+                        [
+                            Assign(Id("n"), BinaryOp("*",Id("count"),IntLiteral(2))),
+                            Return(Id("n"))
+                        ]
+                ))],Id("thing"))]))
+        self.assertTrue(TestAST.test(input,expect,346))
